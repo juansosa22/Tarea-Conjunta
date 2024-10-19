@@ -1,0 +1,62 @@
+import sys
+
+class Grafo:
+    def __init__(self, num_nodos):
+        # Inicializa el grafo con una matriz de adyacencia de tamaño num_nodos x num_nodos
+        self.num_nodos = num_nodos
+        self.matriz_adyacencia = [[0 for _ in range(num_nodos)] for _ in range(num_nodos)]
+    
+    def agregar_arista(self, nodo_origen, nodo_destino, peso):
+        # Añade una arista dirigida desde nodo_origen hacia nodo_destino con un peso (distancia)
+        self.matriz_adyacencia[nodo_origen][nodo_destino] = peso
+    
+    def mostrar_matriz_adyacencia(self):
+        # Muestra la matriz de adyacencia en formato legible
+        for fila in self.matriz_adyacencia:
+            print(fila)
+
+    def dijkstra(self, nodo_inicial):
+        # Inicializa las distancias con infinito y la distancia del nodo inicial en 0
+        distancias = [sys.maxsize] * self.num_nodos
+        distancias[nodo_inicial] = 0
+        visitados = [False] * self.num_nodos
+        predecesores = [-1] * self.num_nodos
+        
+        for _ in range(self.num_nodos):
+            # Encuentra el nodo no visitado con la distancia mínima
+            min_distancia = sys.maxsize
+            nodo_actual = -1
+            
+            for i in range(self.num_nodos):
+                if not visitados[i] and distancias[i] < min_distancia:
+                    min_distancia = distancias[i]
+                    nodo_actual = i
+            
+            # Marca el nodo actual como visitado
+            visitados[nodo_actual] = True
+            
+            # Actualiza las distancias de los nodos adyacentes al nodo actual
+            for vecino in range(self.num_nodos):
+                if (self.matriz_adyacencia[nodo_actual][vecino] > 0 and not visitados[vecino]):
+                    nueva_distancia = distancias[nodo_actual] + self.matriz_adyacencia[nodo_actual][vecino]
+                    if nueva_distancia < distancias[vecino]:
+                        distancias[vecino] = nueva_distancia
+                        predecesores[vecino] = nodo_actual
+        
+        return distancias, predecesores
+
+    def mostrar_camino_mas_corto(self, nodo_origen, nodo_destino):
+        distancias, predecesores = self.dijkstra(nodo_origen)
+        if distancias[nodo_destino] == sys.maxsize:
+            print(f"No hay camino del nodo {nodo_origen} al nodo {nodo_destino}.")
+            return
+
+        # Recupera el camino más corto
+        camino = []
+        nodo_actual = nodo_destino
+        while nodo_actual != -1:
+            camino.insert(0, nodo_actual)
+            nodo_actual = predecesores[nodo_actual]
+        
+        print(f"Camino más corto del nodo {nodo_origen} al nodo {nodo_destino}: {' -> '.join(map(str, camino))}")
+        print(f"Coste total: {distancias[nodo_destino]}")
